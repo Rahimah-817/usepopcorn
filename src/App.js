@@ -8,15 +8,18 @@ const KEY = 'f84fc31d';
 export default function App() {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const query = 'interstellar';
 
   useEffect(function () {
     async function fetchMovies() {
+      setIsLoading(true);
       const res = await fetch(
         `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
       );
       const data = await res.json();
       setMovies(data.Search);
+      setIsLoading(false);
     }
     fetchMovies();
   }, []);
@@ -28,9 +31,7 @@ export default function App() {
         <NumResult movies={movies} />
       </Navbar>
       <Main>
-        <Box>
-          <MovieList movies={movies} />
-        </Box>
+        <Box>{isLoading ? <Loader /> : <MovieList movies={movies} />}</Box>
         <Box>
           <WatchedSummery watched={watched} />
           <WatchedMovieList watched={watched} />
@@ -38,6 +39,10 @@ export default function App() {
       </Main>
     </>
   );
+}
+
+function Loader() {
+  return <p className='loader'>Loading...</p>
 }
 
 function Navbar({ children }) {
@@ -59,6 +64,9 @@ function Logo() {
 }
 
 function NumResult({ movies }) {
+  if (!movies || !Array.isArray(movies)) {
+    return <p className='num-results'>no resualt found!</p>;
+  }
   return (
     <p className='num-results'>
       Found <strong>{movies.length}</strong> results
