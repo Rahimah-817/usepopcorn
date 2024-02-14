@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 const tempMovieData = [
   {
@@ -99,8 +99,28 @@ function NumResult({ movies }) {
   );
 }
 
-function Search() {
-  const [query, setQuery] = useState('');
+function Search({ query, setQuery }) {
+  const inputEl = useRef(null);
+
+  useEffect(() => {
+    function callback(e) {
+      if (document.activeElement === inputEl.current) return;
+
+      if (e.code === 'Enter') {
+        inputEl.current.focus();
+        setQuery('');
+      }
+    }
+    document.addEventListener('keydown', callback);
+    return () => document.addEventListener('keydown', callback);
+  }, [setQuery]);
+
+  // useEffect(() => {
+  //   const el = document.querySelector('.search');
+  //   console.log(el);
+  //   el.focus();
+  // }, [query]);
+
   return (
     <input
       className='search'
@@ -108,6 +128,7 @@ function Search() {
       placeholder='Search movies...'
       value={query}
       onChange={(e) => setQuery(e.target.value)}
+      ref={inputEl}
     />
   );
 }
